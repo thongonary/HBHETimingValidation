@@ -25,15 +25,15 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
 # single pion without PU                                
-'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/SinglePion/LocalGen/Phase1/step2_pi1-100_2017_realistic.root'
-
+#'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/SinglePion/LocalGen/Phase1/step2_pi1-100_2017_realistic.root'
+'root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/RecoAlgos/SinglePion/LocalGen/Phase1/step2_pi500_2017_realistic.root'
 ## this is w/o PU
 #'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/Samples_90_pre2/RelValTTbar_13_GEN-SIM-DIGI-RAW_90X_upgrade2017_realistic_v0-v1/34D0D955-66C3-E611-96C0-0025905A48F0.root',
 #'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/Samples_90_pre2/RelValTTbar_13_GEN-SIM-DIGI-RAW_90X_upgrade2017_realistic_v0-v1/546FB65F-66C3-E611-9B5C-0025905A6110.root',
@@ -117,7 +117,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:step3_timing.root'),
+    fileName = cms.untracked.string('file:step3_singlepi_500.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -145,6 +145,19 @@ process.hbheprerecoM3 = process.hbheprereco.clone()
 process.hbheprerecoM3.algorithm.__setattr__('useM2',cms.bool(False))
 process.hbheprerecoM3.algorithm.__setattr__('useM3',cms.bool(True))
 process.hbheprerecoM3.algorithm.__setattr__('useMahi',cms.bool(False))
+process.hbheprerecoM3.algorithm.__setattr__('pulseShapeType',cms.int32(1))
+
+process.hbheprerecoM3csv = process.hbheprereco.clone()
+process.hbheprerecoM3csv.algorithm.__setattr__('useM2',cms.bool(False))
+process.hbheprerecoM3csv.algorithm.__setattr__('useM3',cms.bool(True))
+process.hbheprerecoM3csv.algorithm.__setattr__('useMahi',cms.bool(False))
+process.hbheprerecoM3csv.algorithm.__setattr__('pulseShapeType',cms.int32(2))
+
+process.hbheprerecoM3csv105 = process.hbheprereco.clone()
+process.hbheprerecoM3csv105.algorithm.__setattr__('useM2',cms.bool(False))
+process.hbheprerecoM3csv105.algorithm.__setattr__('useM3',cms.bool(True))
+process.hbheprerecoM3csv105.algorithm.__setattr__('useMahi',cms.bool(False))
+process.hbheprerecoM3csv105.algorithm.__setattr__('pulseShapeType',cms.int32(3))
 
 process.hbheprerecoM2csv = process.hbheprereco.clone()
 process.hbheprerecoM2csv.algorithm.__setattr__('useM2',cms.bool(True))
@@ -167,7 +180,7 @@ process.hbherecoMAHIlagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM2*process.hbheprerecoM3*process.hbheprerecoM2csv*process.hbheprerecoM2lagcsv*process.hbherecoMAHIlagcsv)
+process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM2*process.hbheprerecoM3*process.hbheprerecoM3csv*process.hbheprerecoM3csv105*process.hbheprerecoM2csv*process.hbheprerecoM2lagcsv*process.hbherecoMAHIlagcsv)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
@@ -191,7 +204,7 @@ process=cleanUnscheduled(process)
 from Validation.Performance.TimeMemoryInfo import customise
 
 #call to customisation function customise imported from Validation.Performance.TimeMemoryInfo
-process = customise(process)
+#process = customise(process)
 
 ##from SLHCUpgradeSimulations.Configuration.HCalCustoms import load_HcalHardcode
 ##process = load_HcalHardcode(process)

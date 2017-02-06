@@ -23,6 +23,7 @@ using namespace std;
 
 // user include files
 #include "TLine.h"
+#include "TROOT.h"
 #include "TStyle.h"
 #include "TTree.h"
 #include "TFile.h"
@@ -62,7 +63,8 @@ using namespace std;
 // constructor "usesResource("TFileService");"
 // This will improve performance in multithreaded jobs.
 
-class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
+class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
+{
    public:
       explicit MakeRun2Plots(const edm::ParameterSet&);
       ~MakeRun2Plots();
@@ -96,6 +98,8 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
       double Method0EnergyM3;
       double RecHitEnergyM3;
+      double RecHitEnergyM3csv;
+      double RecHitEnergyM3csv105;
       double RecHitTimeM3;
 
       int LumiBlock;
@@ -112,6 +116,8 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM2csv105;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM2csvlag;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM3;
+      edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM3csv;
+      edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM3csv105;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM0;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenMAHI;
 
@@ -175,6 +181,43 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH2F* hCheckEnergyM2csvlagMAHIcsvlag_M2_HE;
 
 
+      TH2F* hCheckEnergyM3M3csv_M3_HB;
+      TH2F* hCheckEnergyM3M3csv105_M3_HB;
+      TH2F* hCheckEnergyM3M3csv_M3_HE;
+      TH2F* hCheckEnergyM3M3csv105_M3_HE;
+
+      TH2F* hCheckA3A4_M3_HB;
+      TH2F* hCheckA3A4_M3_HE;
+      TH2F* hCheckA4A5_M3_HB;
+      TH2F* hCheckA4A5_M3_HE;
+      TH2F* hCheckA3A5_M3_HB;
+      TH2F* hCheckA3A5_M3_HE;
+
+      TH2F* hCheckA3A4_M3csv_HB;
+      TH2F* hCheckA3A4_M3csv_HE;
+      TH2F* hCheckA4A5_M3csv_HB;
+      TH2F* hCheckA4A5_M3csv_HE;
+      TH2F* hCheckA3A5_M3csv_HB;
+      TH2F* hCheckA3A5_M3csv_HE;
+
+      TH2F* hCheckA3A4_M3csv105_HB;
+      TH2F* hCheckA3A4_M3csv105_HE;
+      TH2F* hCheckA4A5_M3csv105_HB;
+      TH2F* hCheckA4A5_M3csv105_HE;
+      TH2F* hCheckA3A5_M3csv105_HB;
+      TH2F* hCheckA3A5_M3csv105_HE;
+
+      TH2F* hCheckM3M2_HB;
+      TH2F *hCheckM3csvM2_HB;
+      TH2F *hCheckM3csv105M2_HB;
+
+      TH2F* hCheckM3M2_HB_zoom;
+      TH2F *hCheckM3csvM2_HB_zoom;
+      TH2F *hCheckM3csv105M2_HB_zoom;
+
+      TH2F* hCheckM3M2_HE;
+      TH2F *hCheckM3csvM2_HE;
+      TH2F *hCheckM3csv105M2_HE;
 
   HcalSimParameterMap simParameterMap_;
 
@@ -187,11 +230,13 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   usesResource("TFileService");
   
   // Tell which collection is consumed
-  hRhTokenM2 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2"));
-  hRhTokenM2csv105 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2csv"));
-  hRhTokenM2csvlag = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2lagcsv"));
-  hRhTokenM3 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM3"));
-  hRhTokenM0 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM0"));
+  hRhTokenM2 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprerecoM2"));
+  hRhTokenM2csv105 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprerecoM2csv"));
+  hRhTokenM2csvlag = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprerecoM2lagcsv"));
+  hRhTokenM3 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprerecoM3"));
+  hRhTokenM3csv = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprerecoM3csv"));
+  hRhTokenM3csv105 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprerecoM3csv105"));
+  hRhTokenM0 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprerecoM0"));
   hRhTokenMAHI = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoMAHIlagcsv"));
 
   hOToken = consumes<HORecHitCollection >(iConfig.getUntrackedParameter<string>("HORecHits","horeco"));
@@ -303,6 +348,11 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hCheckEnergyM2csvlagMAHIcsvlag_timing_HE = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_timing_HE",";M2_{csvlag}-MAHI_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
   hCheckEnergyM2csvlagMAHIcsvlag_M2_HE = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_M2_HE",";M2_{csvlag}-MAHI_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
 
+  hCheckEnergyM3M3csv_M3_HB = FileService->make<TH2F>("CheckEnergyM3M3csv_M3_HB",";M3-M3_{csv};M3 Energy",200,-2,2,100,0,100);
+  hCheckEnergyM3M3csv105_M3_HB = FileService->make<TH2F>("CheckEnergyM3M3csv105_M3_HB",";M3-M3_{csv105};M3 Energy",200,-2,2,100,0,100);
+  hCheckEnergyM3M3csv_M3_HE = FileService->make<TH2F>("CheckEnergyM3M3csv_M3_HE",";M3-M3_{csv};M3 Energy",200,-2,2,100,0,100);
+  hCheckEnergyM3M3csv105_M3_HE = FileService->make<TH2F>("CheckEnergyM3M3csv105_M3_HE",";M3-M3_{csv105};M3 Energy",200,-2,2,100,0,100);
+  
   hCheckEnergyM2M0 = FileService->make<TH2F>("EnergyM2M0","EnergyM2M0",20,0.,100.,20,0.,100.);
   hCheckEnergyM2M0->GetYaxis()->SetTitle("M2 Energy");
   hCheckEnergyM2M0->GetXaxis()->SetTitle("M0 Energy");
@@ -332,6 +382,41 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hCheckM2Pull_HE = FileService->make<TH1F>("PullM2_HE","PullM2_HE",200,-2,2.);
   hCheckM2Pull_HE->GetXaxis()->SetTitle("(M2-Sim)/Sim");
 
+  hCheckA3A4_M3_HB = FileService->make<TH2F>("CheckA3A4_M3_HB",";Charge TS4 (GeV); Charge TS3 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A4_M3_HE = FileService->make<TH2F>("CheckA3A4_M3_HE",";Charge TS4 (GeV); Charge TS3 (GeV)",300,-10,120,300,-10,120);
+  hCheckA4A5_M3_HB = FileService->make<TH2F>("CheckA4A5_M3_HB",";Charge TS4 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA4A5_M3_HE = FileService->make<TH2F>("CheckA4A5_M3_HE",";Charge TS4 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A5_M3_HB = FileService->make<TH2F>("CheckA3A5_M3_HB",";Charge TS3 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A5_M3_HE = FileService->make<TH2F>("CheckA3A5_M3_HE",";Charge TS3 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+
+  hCheckA3A4_M3csv_HB = FileService->make<TH2F>("CheckA3A4_M3csv_HB",";Charge TS4 (GeV); Charge TS3 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A4_M3csv_HE = FileService->make<TH2F>("CheckA3A4_M3csv_HE",";Charge TS4 (GeV); Charge TS3 (GeV)",300,-10,120,300,-10,120);
+  hCheckA4A5_M3csv_HB = FileService->make<TH2F>("CheckA4A5_M3csv_HB",";Charge TS4 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA4A5_M3csv_HE = FileService->make<TH2F>("CheckA4A5_M3csv_HE",";Charge TS4 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A5_M3csv_HB = FileService->make<TH2F>("CheckA3A5_M3csv_HB",";Charge TS3 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A5_M3csv_HE = FileService->make<TH2F>("CheckA3A5_M3csv_HE",";Charge TS3 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+
+  hCheckA3A4_M3csv105_HB = FileService->make<TH2F>("CheckA3A4_M3csv105_HB",";Charge TS4 (GeV); Charge TS3 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A4_M3csv105_HE = FileService->make<TH2F>("CheckA3A4_M3csv105_HE",";Charge TS4 (GeV); Charge TS3 (GeV)",300,-10,120,300,-10,120);
+  hCheckA4A5_M3csv105_HB = FileService->make<TH2F>("CheckA4A5_M3csv105_HB",";Charge TS4 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA4A5_M3csv105_HE = FileService->make<TH2F>("CheckA4A5_M3csv105_HE",";Charge TS4 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A5_M3csv105_HB = FileService->make<TH2F>("CheckA3A5_M3csv105_HB",";Charge TS3 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+  hCheckA3A5_M3csv105_HE = FileService->make<TH2F>("CheckA3A5_M3csv105_HE",";Charge TS3 (GeV); Charge TS5 (GeV)",300,-10,120,300,-10,120);
+
+
+    hCheckM3M2_HB = FileService->make<TH2F>("CheckM3M2_HB",";M2;M3/M2",200,0,500,200,0.5,1.5);
+    hCheckM3csvM2_HB = FileService->make<TH2F>("CheckM3csvM2_HB",";M2;M3_{csv}/M2",200,0,500,200,0.5,1.5);
+    hCheckM3csv105M2_HB = FileService->make<TH2F>("CheckM3csv105M2_HB",";M2;M3_{csv105}/M2",200,0,500,200,0.5,1.5);
+
+    hCheckM3M2_HE = FileService->make<TH2F>("CheckM3M2_HE",";M2;M3/M2",200,0,500,200,0.5,1.5);
+    hCheckM3csvM2_HE = FileService->make<TH2F>("CheckM3csvM2_HE",";M2;M3_{csv}/M2",200,0,500,200,0.5,1.5);
+    hCheckM3csv105M2_HE = FileService->make<TH2F>("CheckM3csv105M2_HE",";M2;M3_{csv105}/M2",200,0,500,200,0.5,1.5);
+
+    hCheckM3M2_HB_zoom = FileService->make<TH2F>("CheckM3M2_HB_zoom",";M2;M3/M2",200,0,5,200,0,3);
+    hCheckM3csvM2_HB_zoom = FileService->make<TH2F>("CheckM3csvM2_HB_zoom",";M2;M3_{csv}/M2",200,0,5,200,0,3);
+    hCheckM3csv105M2_HB_zoom = FileService->make<TH2F>("CheckM3csv105M2_HB_zoom",";M2;M3_{csv105}/M2",200,0,5,200,0,3);
+
+
 }
 
 
@@ -355,6 +440,13 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   Handle<HBHERecHitCollection> hRecHitsM3; // create handle
   iEvent.getByToken(hRhTokenM3, hRecHitsM3); // get events based on token
+  
+  Handle<HBHERecHitCollection> hRecHitsM3csv; // create handle
+  iEvent.getByToken(hRhTokenM3csv, hRecHitsM3csv); // get events based on token
+
+  Handle<HBHERecHitCollection> hRecHitsM3csv105; // create handle
+  iEvent.getByToken(hRhTokenM3csv105, hRecHitsM3csv105); // get events based on token
+
 
 //  Handle<HBHERecHitCollection> hRecHitsM0; // create handle
 //  iEvent.getByToken(hRhTokenM0, hRecHitsM0); // get events based on token
@@ -516,6 +608,187 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(detID_rh.ieta())>17 && std::abs(detID_rhcsv.ieta())>17) hCheckEnergyM2csvlagMAHIcsvlag_M2_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
     }
   }
+  
+  for(int i = 0; i < (int)hRecHitsM3->size(); i++) 
+  {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHitsM3)[i].id().rawId();
+    
+    // ID information can get us detector coordinates
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    double PreviousTimeEnergy = (*hRecHitsM3)[i].eraw();
+    double InTimeEnergy = (*hRecHitsM3)[i].energy();
+    double NextTimeEnergy = (*hRecHitsM3)[i].chi2();
+      
+    if (std::abs(iEta) < 15) hCheckA3A4_M3_HB->Fill(InTimeEnergy,PreviousTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA3A4_M3_HE->Fill(InTimeEnergy,PreviousTimeEnergy);
+    if (std::abs(iEta) < 15) hCheckA4A5_M3_HB->Fill(InTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA4A5_M3_HE->Fill(InTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) < 15) hCheckA3A5_M3_HB->Fill(PreviousTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA3A5_M3_HE->Fill(PreviousTimeEnergy,NextTimeEnergy);
+  }
+  
+  for(int i = 0; i < (int)hRecHitsM3csv->size(); i++) 
+  {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHitsM3csv)[i].id().rawId();
+    
+    // ID information can get us detector coordinates
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    double PreviousTimeEnergy = (*hRecHitsM3csv)[i].eraw();
+    double InTimeEnergy = (*hRecHitsM3csv)[i].energy();
+    double NextTimeEnergy = (*hRecHitsM3csv)[i].chi2();
+      
+    if (std::abs(iEta) < 15) hCheckA3A4_M3csv_HB->Fill(InTimeEnergy,PreviousTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA3A4_M3csv_HE->Fill(InTimeEnergy,PreviousTimeEnergy);
+    if (std::abs(iEta) < 15) hCheckA4A5_M3csv_HB->Fill(InTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA4A5_M3csv_HE->Fill(InTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) < 15) hCheckA3A5_M3csv_HB->Fill(PreviousTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA3A5_M3csv_HE->Fill(PreviousTimeEnergy,NextTimeEnergy);
+  }
+  
+  for(int i = 0; i < (int)hRecHitsM3csv105->size(); i++) 
+  {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHitsM3csv105)[i].id().rawId();
+    
+    // ID information can get us detector coordinates
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    double PreviousTimeEnergy = (*hRecHitsM3csv105)[i].eraw();
+    double InTimeEnergy = (*hRecHitsM3csv105)[i].energy();
+    double NextTimeEnergy = (*hRecHitsM3csv105)[i].chi2();
+      
+    if (std::abs(iEta) < 15) hCheckA3A4_M3csv105_HB->Fill(InTimeEnergy,PreviousTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA3A4_M3csv105_HE->Fill(InTimeEnergy,PreviousTimeEnergy);
+    if (std::abs(iEta) < 15) hCheckA4A5_M3csv105_HB->Fill(InTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA4A5_M3csv105_HE->Fill(InTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) < 15) hCheckA3A5_M3csv105_HB->Fill(PreviousTimeEnergy,NextTimeEnergy);
+    if (std::abs(iEta) > 17) hCheckA3A5_M3csv105_HE->Fill(PreviousTimeEnergy,NextTimeEnergy);
+  }
+
+  // COMPARE DIFFERENT M3's
+  for(int i = 0; i < (int)hRecHitsM3->size(); i++) 
+  {
+    for(int j = 0; j < (int)hRecHitsM3csv->size(); j++) 
+    {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHitsM3)[i].id().rawId();
+    HcalDetId detID_rhcsv = (*hRecHitsM3csv)[j].id().rawId();
+    
+    // ID information can get us detector coordinates
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    Method0Energy = (*hRecHits)[i].eraw();
+    RecHitEnergy = (*hRecHitsM3)[i].energy();
+    RecHitEnergyCSV = (*hRecHitsM3csv)[j].energy();
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckEnergyM3M3csv_M3_HB->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckEnergyM3M3csv_M3_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    }
+  }
+
+  for(int i = 0; i < (int)hRecHitsM3->size(); i++) 
+  {
+    for(int j = 0; j < (int)hRecHitsM3csv105->size(); j++) 
+    {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHitsM3)[i].id().rawId();
+    HcalDetId detID_rhcsv = (*hRecHitsM3csv105)[j].id().rawId();
+    
+    // ID information can get us detector coordinates
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    Method0Energy = (*hRecHits)[i].eraw();
+    RecHitEnergy = (*hRecHitsM3)[i].energy();
+    RecHitEnergyCSV = (*hRecHitsM3csv105)[j].energy();
+    if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckEnergyM3M3csv105_M3_HB->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    if( detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckEnergyM3M3csv105_M3_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    }
+  }
+
+
+
+  // COMPARE M3/M2
+  for(int i = 0; i < (int)hRecHits->size(); i++) 
+  {
+    for(int j = 0; j < (int)hRecHitsM3->size(); j++) 
+    {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
+    HcalDetId detID_rhcsv = (*hRecHitsM3)[j].id().rawId();
+    
+    // ID information can get us detector coordinates
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    Method0Energy = (*hRecHits)[i].eraw();
+    RecHitEnergy = (*hRecHits)[i].energy();
+    RecHitEnergyM3 = (*hRecHitsM3)[j].energy();
+    if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3M2_HB->Fill(RecHitEnergy, RecHitEnergyM3/RecHitEnergy);
+    if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3M2_HB_zoom->Fill(RecHitEnergy, RecHitEnergyM3/RecHitEnergy);
+    if( detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckM3M2_HE->Fill(RecHitEnergy, RecHitEnergyM3/RecHitEnergy);
+    }
+  }
+
+  for(int i = 0; i < (int)hRecHits->size(); i++) 
+  {
+    for(int j = 0; j < (int)hRecHitsM3csv->size(); j++) 
+    {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
+    HcalDetId detID_rhcsv = (*hRecHitsM3csv)[j].id().rawId();
+    
+    // ID information can get us detector coordinates
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    Method0Energy = (*hRecHits)[i].eraw();
+    RecHitEnergy = (*hRecHits)[i].energy();
+    RecHitEnergyM3csv = (*hRecHitsM3csv)[j].energy();
+    if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csvM2_HB->Fill(RecHitEnergy, RecHitEnergyM3csv/RecHitEnergy);
+    if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csvM2_HB_zoom->Fill(RecHitEnergy, RecHitEnergyM3csv/RecHitEnergy);
+    if( detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckM3csvM2_HE->Fill(RecHitEnergy, RecHitEnergyM3csv/RecHitEnergy);
+    }
+  }
+
+
+  for(int i = 0; i < (int)hRecHits->size(); i++) 
+  {
+    for(int j = 0; j < (int)hRecHitsM3csv105->size(); j++) 
+    {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
+    HcalDetId detID_rhcsv = (*hRecHitsM3csv105)[j].id().rawId();
+    
+    // ID information can get us detector coordinates
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    Method0Energy = (*hRecHits)[i].eraw();
+    RecHitEnergy = (*hRecHits)[i].energy();
+    RecHitEnergyM3csv105 = (*hRecHitsM3csv105)[j].energy();
+    if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csv105M2_HB->Fill(RecHitEnergy, RecHitEnergyM3csv105/RecHitEnergy);
+    if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csv105M2_HB_zoom->Fill(RecHitEnergy, RecHitEnergyM3csv105/RecHitEnergy);
+    if( detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckM3csv105M2_HE->Fill(RecHitEnergy, RecHitEnergyM3csv105/RecHitEnergy);
+    }
+  }
+
+
   ///////////
   /// $$$$
   /// $$$$
@@ -668,7 +941,27 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 void MakeRun2Plots::beginJob(){}
 
 // ------------ method called once each job just after ending the event loop  ------------
-void MakeRun2Plots::endJob(){}
+void MakeRun2Plots::endJob()
+{
+    TCanvas *c1 = new TCanvas("c1","",650,600);
+    c1->cd();
+    gStyle->SetOptStat(11);
+    gPad->SetLogz();
+    gPad->SetGridy();
+
+    hCheckM3M2_HB->Draw("COLZ");
+    c1->SaveAs("M3M2_HB.png");
+    hCheckM3M2_HB_zoom->Draw("COLZ");
+    c1->SaveAs("M3M2_HB_zoom.png");
+    hCheckM3csvM2_HB->Draw("COLZ");
+    c1->SaveAs("M3csvM2_HB.png");
+    hCheckM3csvM2_HB_zoom->Draw("COLZ");
+    c1->SaveAs("M3csvM2_HB_zoom.png");
+    hCheckM3csv105M2_HB->Draw("COLZ");
+    c1->SaveAs("M3csv105M2_HB.png");
+    hCheckM3csv105M2_HB_zoom->Draw("COLZ");
+    c1->SaveAs("M3csv105M2_HB_zoom.png");
+}
 
 void MakeRun2Plots::ClearVariables(){
  RecHitEnergy = 0;
