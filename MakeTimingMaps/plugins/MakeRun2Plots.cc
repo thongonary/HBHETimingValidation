@@ -219,6 +219,10 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>
       TH2F *hCheckM3csvM2_HE;
       TH2F *hCheckM3csv105M2_HE;
 
+      TH1F *hCheckM3M2_HB_1D;
+      TH1F *hCheckM3csvM2_HB_1D;
+      TH1F *hCheckM3csv105M2_HB_1D;
+
   HcalSimParameterMap simParameterMap_;
 
 };
@@ -415,6 +419,11 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
     hCheckM3M2_HB_zoom = FileService->make<TH2F>("CheckM3M2_HB_zoom",";M2;M3/M2",200,0,5,200,0,3);
     hCheckM3csvM2_HB_zoom = FileService->make<TH2F>("CheckM3csvM2_HB_zoom",";M2;M3_{csv}/M2",200,0,5,200,0,3);
     hCheckM3csv105M2_HB_zoom = FileService->make<TH2F>("CheckM3csv105M2_HB_zoom",";M2;M3_{csv105}/M2",200,0,5,200,0,3);
+
+
+      hCheckM3M2_HB_1D = FileService->make<TH1F>("CheckM3M2_HB_1D",";M3/M2",100,0.5,1.5);
+      hCheckM3csvM2_HB_1D = FileService->make<TH1F>("CheckM3csvM2_HB_1D",";M3_{csv}/M2",100,0.5,1.5);;
+      hCheckM3csv105M2_HB_1D = FileService->make<TH1F>("CheckM3csv105M2_HB_1D",";M3_{csv105}/M2",100,0.5,1.5);;
 
 
 }
@@ -740,6 +749,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3M2_HB->Fill(RecHitEnergy, RecHitEnergyM3/RecHitEnergy);
     if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3M2_HB_zoom->Fill(RecHitEnergy, RecHitEnergyM3/RecHitEnergy);
     if( detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckM3M2_HE->Fill(RecHitEnergy, RecHitEnergyM3/RecHitEnergy);
+    if(RecHitEnergy>5.0 && detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3M2_HB_1D->Fill(RecHitEnergyM3/RecHitEnergy);
     }
   }
 
@@ -762,6 +772,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csvM2_HB->Fill(RecHitEnergy, RecHitEnergyM3csv/RecHitEnergy);
     if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csvM2_HB_zoom->Fill(RecHitEnergy, RecHitEnergyM3csv/RecHitEnergy);
     if( detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckM3csvM2_HE->Fill(RecHitEnergy, RecHitEnergyM3csv/RecHitEnergy);
+    if(RecHitEnergy>5.0 && detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csvM2_HB_1D->Fill(RecHitEnergyM3csv/RecHitEnergy);
     }
   }
 
@@ -785,6 +796,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csv105M2_HB->Fill(RecHitEnergy, RecHitEnergyM3csv105/RecHitEnergy);
     if( detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csv105M2_HB_zoom->Fill(RecHitEnergy, RecHitEnergyM3csv105/RecHitEnergy);
     if( detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckM3csv105M2_HE->Fill(RecHitEnergy, RecHitEnergyM3csv105/RecHitEnergy);
+    if(RecHitEnergy>5.0 && detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckM3csv105M2_HB_1D->Fill(RecHitEnergyM3csv105/RecHitEnergy);
     }
   }
 
@@ -950,17 +962,34 @@ void MakeRun2Plots::endJob()
     gPad->SetGridy();
 
     hCheckM3M2_HB->Draw("COLZ");
-    c1->SaveAs("M3M2_HB.png");
+    c1->SaveAs("M3M2_HB_noJEC.png");
+    
     hCheckM3M2_HB_zoom->Draw("COLZ");
-    c1->SaveAs("M3M2_HB_zoom.png");
+    c1->SaveAs("M3M2_HB_zoom_noJEC.png");
+    
     hCheckM3csvM2_HB->Draw("COLZ");
-    c1->SaveAs("M3csvM2_HB.png");
+    c1->SaveAs("M3csvM2_HB_noJEC.png");
+   
     hCheckM3csvM2_HB_zoom->Draw("COLZ");
-    c1->SaveAs("M3csvM2_HB_zoom.png");
+    c1->SaveAs("M3csvM2_HB_zoom_noJEC.png");
+   
     hCheckM3csv105M2_HB->Draw("COLZ");
-    c1->SaveAs("M3csv105M2_HB.png");
+    c1->SaveAs("M3csv105M2_HB_noJEC.png");
+   
     hCheckM3csv105M2_HB_zoom->Draw("COLZ");
-    c1->SaveAs("M3csv105M2_HB_zoom.png");
+    c1->SaveAs("M3csv105M2_HB_zoom_noJEC.png");
+    
+    gPad->SetGridy(0);
+    gPad->SetGridx();
+    
+    hCheckM3csvM2_HB_1D->Draw();
+    c1->SaveAs("M3csvM2_HB_1D_noJEC.png");
+    
+    hCheckM3M2_HB_1D->Draw();
+    c1->SaveAs("M3M2_HB_1D_noJEC.png");
+    
+    hCheckM3csv105M2_HB_1D->Draw();
+    c1->SaveAs("M3csv105M2_HB_1D_noJEC.png");
 }
 
 void MakeRun2Plots::ClearVariables(){
