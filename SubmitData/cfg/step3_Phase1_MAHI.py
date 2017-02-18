@@ -25,7 +25,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1000)
 )
 
 # Input source
@@ -44,7 +44,7 @@ process.source = cms.Source("PoolSource",
 #'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/Samples_90_pre2/RelValTTbar_13_GEN-SIM-DIGI-RAW_90X_upgrade2017_realistic_v0-v1/FE69649A-48C2-E611-8DD2-0025905B85D0.root',
 
 
-## these are w/o PU~35
+## these are w/ PU~35
 #'root://eoscms//eos/cms/store/relval/CMSSW_9_0_0_pre2/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_90X_upgrade2017_realistic_v0-v1/10000/008850AE-37C2-E611-A577-0025905A607A.root',
 #'root://eoscms//eos/cms/store/relval/CMSSW_9_0_0_pre2/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_90X_upgrade2017_realistic_v0-v1/10000/06437686-37C2-E611-821B-0CC47A7C3408.root',
 #'root://eoscms//eos/cms/store/relval/CMSSW_9_0_0_pre2/RelValTTbar_13/GEN-SIM-DIGI-RAW/PU25ns_90X_upgrade2017_realistic_v0-v1/10000/0A7B6E48-37C2-E611-BF26-0CC47A4D7600.root',
@@ -117,7 +117,8 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:step3_singlepi_500.root'),
+    fileName = cms.untracked.string('file:step3_singlepi_M3_Pars3.root'),
+#    fileName = cms.untracked.string('file:step3_ttbarPU35.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -180,7 +181,7 @@ process.hbherecoMAHIlagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM2*process.hbheprerecoM3*process.hbheprerecoM3csv*process.hbheprerecoM3csv105*process.hbheprerecoM2csv*process.hbheprerecoM2lagcsv*process.hbherecoMAHIlagcsv)
+process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM2*process.hbheprerecoM3*process.hbheprerecoM3csv*process.hbheprerecoM3csv105*process.hbheprerecoM2csv*process.hbheprerecoM2lagcsv)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
