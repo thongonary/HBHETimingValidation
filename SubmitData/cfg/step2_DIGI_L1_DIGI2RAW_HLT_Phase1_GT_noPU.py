@@ -15,8 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-####process.load('Configuration.Geometry.GeometryExtended2017devReco_cff')
-process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
@@ -33,7 +33,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     fileNames = cms.untracked.vstring(
-        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/9_0_0_pre2/step1_pi500_phase1.root'
+        'file:step1.root'
     ),
 
     inputCommands = cms.untracked.vstring('keep *', 
@@ -117,16 +117,16 @@ process.schedule.extend(process.HLTSchedule)
 process.schedule.extend([process.endjob_step,process.FEVTDEBUGHLToutput_step])
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(16)
+process.options.numberOfThreads=cms.untracked.uint32(8)
 process.options.numberOfStreams=cms.untracked.uint32(0)
 
 # customisation of the process.
 
 # Automatic addition of the customisation function from HLTrigger.Configuration.customizeHLTforMC
-from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim 
+#from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim
 
 #call to customisation function customizeHLTforFullSim imported from HLTrigger.Configuration.customizeHLTforMC
-process = customizeHLTforFullSim(process)
+#process = customizeHLTforFullSim(process)
 
 ##from SLHCUpgradeSimulations.Configuration.HCalCustoms import load_HcalHardcode
 ##process = load_HcalHardcode(process)
