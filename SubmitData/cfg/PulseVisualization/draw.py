@@ -3,10 +3,11 @@
 # -----
 # Original Author: Thong Nguyen (Caltech)
 # Created: January 12, 2017
-
 import re
 import ROOT
 import argparse
+
+ROOT.gROOT.SetBatch()
 
 class Hit:
     def __init__(self,_spot,_pulseType,_fit,_digi):
@@ -59,10 +60,11 @@ with open(args.infile) as f:
             digi = []
             fit = []
             for ts in range (2,11):
-                pulses.append([float(s) for s in re.findall(r'-?\d+\.\d+',lines[i+ts])])
+                pulses.append([float(s) for s in re.findall(r'(-?\d+(?:\.\d+)?)',lines[i+ts])])
             for val in pulses:
-                digi.append(val[1])
-                fit.append(val[0])
+                print val
+                digi.append(val[2])
+                fit.append(val[1])
 
             # Store different hits:
             if not checkRepeated(spot,allSpots):
@@ -90,12 +92,14 @@ with open(args.infile) as f:
             index += 1 
             canvas = ROOT.TCanvas('canvas'+str(index),'',800,600)
             canvas.cd()
-            plotFilled = False
             drawDigi = False
-
+            draw20 = False
+            draw21 = False
+            draw30 = False
+            draw31 = False
+             
             for hit in allHits:
                 if hit.spot == mySpot and hit.digi == myDigi:
-                    plotFilled = True
                     if not drawDigi:    
                         digi = ROOT.TH1F('digi','',10,0.,10.);
                         setBinLabel(digi)
@@ -103,10 +107,11 @@ with open(args.infile) as f:
                         fillHist(digi,digiVal)
                         digi.SetLineWidth(3)
                         digi.SetLineColor(ROOT.kBlack)
+                        digi.SetMaximum(digiVal[4]*1.2)
                         digi.Draw("hist")
                         drawDigi = True
 
-                    if hit.pulseType == [1]: # standard m2
+                    if hit.pulseType == [20]: # standard m2
                         m2 = ROOT.TH1F('m2','',10,0.,10.);
                         setBinLabel(m2)
                         m2Val = hit.fit
@@ -114,25 +119,37 @@ with open(args.infile) as f:
                         m2.SetLineWidth(3)
                         m2.SetLineColor(ROOT.kRed)
                         m2.Draw("hist same")
+                        draw20 = True
                     
-                    elif hit.pulseType == [2]: # m2csv105
-                        m2csv105 = ROOT.TH1F('m2csv105','',10,0.,10.);
-                        setBinLabel(m2csv105)
-                        m2csv105Val = hit.fit
-                        fillHist(m2csv105,m2csv105Val)
-                        m2csv105.SetLineWidth(3)
-                        m2csv105.SetLineColor(ROOT.kBlue)
-                        m2csv105.Draw("hist same")
-                    
-                    elif hit.pulseType == [3]: # m2csvlag
-                        m2csvlag = ROOT.TH1F('m2csvlag','',10,0.,10.);
-                        m2csvlagVal = hit.fit
-                        fillHist(m2csvlag,m2csvlagVal)
-                        m2csvlag.SetLineWidth(3)
-                        m2csvlag.SetLineColor(ROOT.kOrange)
-                        m2csvlag.Draw("hist same")
+                    elif hit.pulseType == [21]: # m2 using MC pulse
+                        m2mc = ROOT.TH1F('m2mc','',10,0.,10.);
+                        setBinLabel(m2mc)
+                        m2mcVal = hit.fit
+                        fillHist(m2mc,m2mcVal)
+                        m2mc.SetLineWidth(3)
+                        m2mc.SetLineColor(ROOT.kBlue)
+                        m2mc.Draw("hist same")
+                        draw21 = True
 
-            if plotFilled:
+                    elif hit.pulseType == [30]: # standard m3
+                        m3 = ROOT.TH1F('m3','',10,0.,10.);
+                        m3Val = hit.fit
+                        fillHist(m3,m3Val)
+                        m3.SetLineWidth(3)
+                        m3.SetLineColor(ROOT.kOrange)
+                        m3.Draw("hist same")
+                        draw30 = True
+
+                    elif hit.pulseType == [31]: # m3 using mc
+                        m3mc = ROOT.TH1F('m3mc','',10,0.,10.);
+                        m3mcVal = hit.fit
+                        fillHist(m3mc,m3mcVal)
+                        m3mc.SetLineWidth(3)
+                        m3mc.SetLineColor(ROOT.kMagenta)
+                        m3mc.Draw("hist same")
+                        draw31 = True
+
+            if draw20 and draw21 and draw30 and draw31:
                 canvas.BuildLegend(0.65,0.6,0.88,0.88)
                 text = ROOT.TLatex()
                 text.SetTextFont(42)
