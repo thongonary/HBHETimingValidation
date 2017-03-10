@@ -85,6 +85,7 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       // some variables for storing information
       double Method0Energy;
       double RecHitEnergy;
+      double RecHitEnergyM3;
       double RecHitTime;
       double RecHitChi2;
       int LumiBlock;
@@ -109,12 +110,25 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH2F *hCheckEnergyM2M3_endcap;
       TH2F *hCheckEnergyM2M3_endcap_zoom;
       TH2F *hCheckEnergyM2M3_barrel;
+      TH2F *hCheckEnergyM2M3_barrel_zoom;
+      TH1F *hCheckEnergyM2M3ratio_barrel;
+      TH1F *hCheckEnergyM2M3ratio_endcap;
+      TH2F *hCheckEnergyM2M3ratio_barrel_vsM2E;
+      TH2F *hCheckEnergyM2M3ratio_endcap_vsM2E;
+      TH2F *hCheckEnergyM2M3ratio_barrel_vsM2E_zoom;
+      TH2F *hCheckEnergyM2M3ratio_endcap_vsM2E_zoom;
 
       TH1F *hCheckCharge_barrel;
       TH1F *hChecknoiseADC_barrel;
       TH1F *hCheckCharge_endcap;
       TH1F *hChecknoiseADC_endcap;
       TH1F *hChecknoiseDC_endcap;
+
+      TH2F *hCheckEnergyADCnoise_VSfc_endcap;
+      TH2F *hCheckEnergyADCnoise_VSfc_barrel;
+
+      TH2F *hCheckEnergyPHnoise_VSfc_endcap;
+      TH2F *hCheckEnergyPHnoise_VSfc_barrel;
 
       TH1F *hCheckEnergyM2_barrel;
       TH1F *hCheckEnergyM2_endcap;
@@ -140,6 +154,8 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
 
       TH1F *hCheckChi2MX_barrel_gt5;
       TH1F *hCheckChi2MX_endcap_gt5;
+      TH1F *hCheckChi2MX_barrel_lt5;
+      TH1F *hCheckChi2MX_endcap_lt5;
 
       TH2F *hCheckEnergySIMHITM2_HB;
       TH2F *hCheckEnergySIMHITM2_HE;
@@ -230,6 +246,9 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
 
       TProfile *hTimeSlicesAverageFC_HE_depth1;
       TProfile *hTimeSlicesAverageFC_HE_depthgt1;
+
+      TProfile *hTimeSlicesAverageFC_HB_lowE;
+      TProfile *hTimeSlicesAverageFC_HB_highE;
       
       int runNumber_;
       double energyCut_;
@@ -237,6 +256,8 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       double timeHigh_;
       std::vector<double> etas67;
       std::vector<double> etas66;
+
+  bool isData=true;
 
   HcalSimParameterMap simParameterMap_;
         
@@ -255,10 +276,10 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   // Tell which collection is consumed
   hRhToken = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbhereco"));
   hRhTokenM3 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprerecoM3"));
-  InfoToken = consumes<HBHEChannelInfoCollection>(iConfig.getUntrackedParameter<string>("HBHEChannelInfo","hbheprereco"));
+  if(!isData) InfoToken = consumes<HBHEChannelInfoCollection>(iConfig.getUntrackedParameter<string>("HBHEChannelInfo","hbheprereco"));
   //  hRhToken = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprereco"));
   hIsoToken = consumes<bool >(iConfig.getUntrackedParameter<string>("HBHENoiseFilterResultProducer", "HBHEIsoNoiseFilterResult"));
-  hSHitToken = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits","HcalHits"));
+  if(!isData) hSHitToken = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits","HcalHits"));
 
   // example histogram for storing time slice information
   /*
@@ -277,6 +298,12 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckCharge_barrel = FileService->make<TH1F>("charge_barrel","charge_barrel", 1000., 0., 10.);
   hChecknoiseADC_barrel = FileService->make<TH1F>("charge_noiseADC_barrel","charge_noiseADC_barrel", 1000., 0., 10.);
 
+  hCheckEnergyADCnoise_VSfc_endcap = FileService->make<TH2F>("ADCnoise_VSfc_endcap","ADCnoise_VSfc_endcap", 10000, 0., 100000., 1000, 0.005, 0.1);
+  hCheckEnergyADCnoise_VSfc_barrel = FileService->make<TH2F>("ADCnoise_VSfc_barrel","ADCnoise_VSfc_barrel", 10000, 0., 100000., 1000, 0.005, 0.1);
+
+  hCheckEnergyPHnoise_VSfc_endcap = FileService->make<TH2F>("PHnoise_VSfc_endcap","PHnoise_VSfc_endcap", 10000, 0., 100000., 1000, 0.005, 1.);
+  hCheckEnergyPHnoise_VSfc_barrel = FileService->make<TH2F>("PHnoise_VSfc_barrel","PHnoise_VSfc_barrel", 10000, 0., 100000., 1000, 0.005, 1.);
+
   hChi2Energy_barrel = FileService->make<TH2F>("hChi2Energy_barrel","hChi2Energy_barrel",100,0.,500.,100,-2, 5.);
   hChi2Energy_endcap = FileService->make<TH2F>("hChi2Energy_endcap","hChi2Energy_endcap",100,0.,500.,100,-2, 5.);
 
@@ -285,11 +312,21 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hChi2Energy_endcap->GetXaxis()->SetTitle("M2 energy");
   hChi2Energy_endcap->GetYaxis()->SetTitle("log10 (M2 chi2)");
 
+  /////////
+
   hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",100, -2, 5.);
   hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",100, -2, 5.);
 
   hCheckChi2MX_barrel_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
   hCheckChi2MX_endcap_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+
+  hCheckChi2MX_barrel_lt5 = FileService->make<TH1F>("Chi2MX_barrel_lt5","chi2MX_barrel_lt5",100, -2, 5.);
+  hCheckChi2MX_endcap_lt5 = FileService->make<TH1F>("Chi2MX_endcap_lt5","chi2MX_endcap_lt5",100, -2, 5.);
+
+  hCheckChi2MX_barrel_lt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+  hCheckChi2MX_endcap_lt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+
+  /////////
 
   hCheckEnergyM0MX_barrel = FileService->make<TH2F>("M0MXplot_barrel","M0MXplot_barrel",100,0.,500.,100,0.,500.);
   hCheckEnergyM0MX_endcap = FileService->make<TH2F>("M0MXplot_endcap","M0MXplot_endcap",100,0.,500.,100,0.,500.);
@@ -305,16 +342,41 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   //////
 
   hCheckEnergyM2M3_barrel = FileService->make<TH2F>("M2M3plot_barrel","M2M3plot_barrel",100,0.,500.,100,0.,500.);
+  hCheckEnergyM2M3_barrel_zoom = FileService->make<TH2F>("M2M3plot_barrel_zoom","M2M3plot_barrel_zoom",50,0.,5.,50,0.,5.);
   hCheckEnergyM2M3_endcap = FileService->make<TH2F>("M2M3plot_endcap","M2M3plot_endcap",100,0.,500.,100,0.,500.);
   hCheckEnergyM2M3_endcap_zoom = FileService->make<TH2F>("M2M3plot_endcap_zoom","M2M3plot_endcap_zoom",50,0.,5.,50,0.,5.);
+  hCheckEnergyM2M3ratio_barrel = FileService->make<TH1F>("EnergyM2M3ratio_barrel","EnergyM2M3ratio_barrel",100,0.5,1.5);
+  hCheckEnergyM2M3ratio_endcap = FileService->make<TH1F>("EnergyM2M3ratio_endcap","EnergyM2M3ratio_endcap",100,0.5,1.5);
+
+  hCheckEnergyM2M3ratio_barrel_vsM2E = FileService->make<TH2F>("M2M3ratio_barrel_vsM2E","M2M3ratio_barrel_vsM2E",50,0.,500.,50,0.5,1.5);
+  hCheckEnergyM2M3ratio_endcap_vsM2E = FileService->make<TH2F>("M2M3ratio_endcap_vsM2E","M2M3ratio_endcap_vsM2E ",50,0.,500.,50,0.5,1.5);
+
+  hCheckEnergyM2M3ratio_barrel_vsM2E_zoom = FileService->make<TH2F>("M2M3ratio_barrel_vsM2E_zoom","M2M3ratio_barrel_vsM2E_zoom",100,0.,5.,40,0.,2.);
+  hCheckEnergyM2M3ratio_endcap_vsM2E_zoom = FileService->make<TH2F>("M2M3ratio_endcap_vsM2E_zoom","M2M3ratio_endcap_vsM2E_zoom ",100,0.,5.,40,0.,2.);
 
   hCheckEnergyM2M3_barrel->GetYaxis()->SetTitle("M3 Energy");
+  hCheckEnergyM2M3_barrel_zoom->GetYaxis()->SetTitle("M3 Energy");
   hCheckEnergyM2M3_endcap->GetYaxis()->SetTitle("M3 Energy");
   hCheckEnergyM2M3_endcap_zoom->GetYaxis()->SetTitle("M3 Energy");
 
   hCheckEnergyM2M3_barrel->GetXaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2M3_barrel_zoom->GetXaxis()->SetTitle("M2 Energy");
   hCheckEnergyM2M3_endcap->GetXaxis()->SetTitle("M2 Energy");
   hCheckEnergyM2M3_endcap_zoom->GetXaxis()->SetTitle("M2 Energy");
+
+  hCheckEnergyM2M3ratio_barrel->GetXaxis()->SetTitle("M3energy/M2energy");
+  hCheckEnergyM2M3ratio_endcap->GetXaxis()->SetTitle("M3energy/M2energy");
+
+  hCheckEnergyM2M3ratio_barrel_vsM2E->GetXaxis()->SetTitle("M2energy");
+  hCheckEnergyM2M3ratio_endcap_vsM2E->GetXaxis()->SetTitle("M2energy");
+  hCheckEnergyM2M3ratio_barrel_vsM2E->GetYaxis()->SetTitle("M3energy/M2energy");
+  hCheckEnergyM2M3ratio_endcap_vsM2E->GetYaxis()->SetTitle("M3energy/M2energy");
+
+  hCheckEnergyM2M3ratio_barrel_vsM2E_zoom->GetXaxis()->SetTitle("M2energy");
+  hCheckEnergyM2M3ratio_endcap_vsM2E_zoom->GetXaxis()->SetTitle("M2energy");
+  hCheckEnergyM2M3ratio_barrel_vsM2E_zoom->GetYaxis()->SetTitle("M3energy/M2energy");
+  hCheckEnergyM2M3ratio_endcap_vsM2E_zoom->GetYaxis()->SetTitle("M3energy/M2energy");
+
 
   //////
   //////
@@ -370,11 +432,21 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckTimingMX_barrel_gt5->GetXaxis()->SetTitle("M2 Timing");
   hCheckTimingMX_endcap_gt5->GetXaxis()->SetTitle("M2 Timing");
 
+  ///////
+
   hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",100, -2, 5.);
   hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",100, -2, 5.);
 
   hCheckChi2MX_barrel_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
   hCheckChi2MX_endcap_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+
+  hCheckChi2MX_barrel_lt5 = FileService->make<TH1F>("Chi2MX_barrel_lt5","chi2MX_barrel_lt5",100, -2, 5.);
+  hCheckChi2MX_endcap_lt5 = FileService->make<TH1F>("Chi2MX_endcap_lt5","chi2MX_endcap_lt5",100, -2, 5.);
+
+  hCheckChi2MX_barrel_lt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+  hCheckChi2MX_endcap_lt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+
+  ///////
 
   hCheckChi2MX_endcap_depth1_gt5 = FileService->make<TH1F>("Chi2MX_endcap_depth1_gt5","Chi2MX_endcap_depth1_gt5",100, -2, 5.);
   hCheckChi2MX_endcap_depth2_gt5 = FileService->make<TH1F>("Chi2MX_endcap_depth2_gt5","Chi2MX_endcap_depth2_gt5",100, -2, 5.);
@@ -538,6 +610,39 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hTimeSlicesAverageFC_HE_depthgt1->SetTitle("");
   hTimeSlicesAverageFC_HE_depthgt1->GetYaxis()->SetTitle("fC");
 
+  /////
+  /////
+
+  hTimeSlicesAverageFC_HB_lowE = FileService->make<TProfile>("hTimeSlicesAverageFC_HB_lowE","hTimeSlicesAverageFC_HB_lowE",10,0.,10,.0,700000.); // 10,0,10 timeslices //.0,700000. fC
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(1,"TS0");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(2,"TS1");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(3,"TS2");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(4,"TS3");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(5,"TS4");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(6,"TS5");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(7,"TS6");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(8,"TS7");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(9,"TS8");
+  hTimeSlicesAverageFC_HB_lowE->GetXaxis()->SetBinLabel(10,"TS9");
+  hTimeSlicesAverageFC_HB_lowE->SetTitle("");
+  hTimeSlicesAverageFC_HB_lowE->GetYaxis()->SetTitle("fC");
+
+
+  /////
+  hTimeSlicesAverageFC_HB_highE = FileService->make<TProfile>("hTimeSlicesAverageFC_HB_highE","hTimeSlicesAverageFC_HB_highE",10,0.,10,.0,700000.); // 10,0,10 timeslices //.0,700000. fC
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(1,"TS0");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(2,"TS1");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(3,"TS2");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(4,"TS3");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(5,"TS4");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(6,"TS5");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(7,"TS6");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(8,"TS7");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(9,"TS8");
+  hTimeSlicesAverageFC_HB_highE->GetXaxis()->SetBinLabel(10,"TS9");
+  hTimeSlicesAverageFC_HB_highE->SetTitle("");
+  hTimeSlicesAverageFC_HB_highE->GetYaxis()->SetTitle("fC");
+
   // simHIT
 
   hCheckEnergySIMHITM2_HB = FileService->make<TH2F>("EnergySIMHITM2HB","EnergySIMHITM2HB",50,0.,500.,50,0.,500.);
@@ -618,11 +723,13 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.getByToken(hRhTokenM3, hRecHitsM3); // get events based on token
 
   Handle<HBHEChannelInfoCollection> channelData; // create handle
-  iEvent.getByToken(InfoToken, channelData); // get events based on token
-
   Handle<PCaloHitContainer> hSimHits;      // create handle
-  iEvent.getByToken(hSHitToken, hSimHits);   // SimHits
+  if(!isData) {
+    iEvent.getByToken(InfoToken, channelData); // get events based on token
+    iEvent.getByToken(hSHitToken, hSimHits);   // SimHits
+  }
 
+  if(!isData) {
   // Loop over all rechits in one event
   for(int i = 0; i < (int) channelData->size(); i++) {
 
@@ -633,9 +740,11 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
     double noiseADC_HE=0;
     double noiseDC_HE=0;
+    double noisePH_HE=0;
     double totCharge_HE=0;
 
     double noiseADC_HB=0;
+    double noisePH_HB=0;
     double totCharge_HB=0;
 
     for(unsigned int ip=0; ip<cssize; ++ip){
@@ -650,19 +759,24 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       }
 
       if((*channelData)[i].hasTimeInfo()) totCharge_HE += charge-ped;
-      if((*channelData)[i].hasTimeInfo()) noiseADC_HE += sigmaSiPMQIE10(charge);
+      if((*channelData)[i].hasTimeInfo()) noiseADC_HE += (1./sqrt(12))*(*channelData)[i].tsDFcPerADC(ip);
       if((*channelData)[i].hasTimeInfo()) noiseDC_HE += getSiPMDarkCurrent();
+      if((*channelData)[i].hasTimeInfo()) noisePH_HE += 1./sqrt((charge-ped)/44);
 
       if(!(*channelData)[i].hasTimeInfo()) totCharge_HB += charge-ped;
-      if(!(*channelData)[i].hasTimeInfo()) noiseADC_HB += sigmaHPDQIE8(charge);
+      if(!(*channelData)[i].hasTimeInfo()) noiseADC_HB += (1./sqrt(12))*(*channelData)[i].tsDFcPerADC(ip);
+      if((*channelData)[i].hasTimeInfo()) noisePH_HB += 1./sqrt((charge-ped)/(0.3305));
 
-      /*
-      noiseDCArr[ip] = 0;
-      if(channelData.hasTimeInfo() && (charge-ped)>channelData.tsPedestalWidth(ip)) {
-	noiseDCArr[ip] = psfPtr_->getSiPMDarkCurrent(channelData.darkCurrent(),channelData.fcByPE(),channelData.lambda());
-      }
+      if((*channelData)[i].hasTimeInfo()) hCheckEnergyADCnoise_VSfc_endcap->Fill(charge,(1./sqrt(12))*(*channelData)[i].tsDFcPerADC(ip)/charge);
+      if(!(*channelData)[i].hasTimeInfo()) hCheckEnergyADCnoise_VSfc_barrel->Fill(charge,(1./sqrt(12))*(*channelData)[i].tsDFcPerADC(ip)/charge);
 
-      */
+      if((*channelData)[i].hasTimeInfo()) hCheckEnergyPHnoise_VSfc_endcap->Fill(charge,1./sqrt((charge-ped)/44));
+      if(!(*channelData)[i].hasTimeInfo()) hCheckEnergyPHnoise_VSfc_barrel->Fill(charge,1./sqrt((charge-ped)/(0.3305)));
+
+//      noiseDCArr[ip] = 0;
+//      if(channelData.hasTimeInfo() && (charge-ped)>channelData.tsPedestalWidth(ip)) {
+//	noiseDCArr[ip] = psfPtr_->getSiPMDarkCurrent(channelData.darkCurrent(),channelData.fcByPE(),channelData.lambda());
+//      }
 
     }
 
@@ -689,6 +803,8 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       }
     }
   }
+
+  }// end ChanelInfo
 
   /////  /////   /////
   /////  /////   /////
@@ -722,6 +838,7 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     RecHitEnergy = (*hRecHits)[i].energy();
     RecHitTime = (*hRecHits)[i].time();
     RecHitChi2 = (*hRecHits)[i].chi2();
+    RecHitEnergyM3 = (*hRecHits)[i].eaux();
 
     //    cout << " energy M2= " << RecHitEnergy << " RecHitTime M2=" << RecHitTime << " RecHitChi2=" << RecHitChi2 << endl;
     //    if(Method0Energy>5) cout << "energy="<< Method0Energy << "  ; chi2=" << (*hRecHits)[i].chi2() << endl;
@@ -788,6 +905,11 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if( std::abs(iEta) < 14 ) hCheckEnergyTiming_barrel->Fill(RecHitEnergy,RecHitTime);
     if( std::abs(iEta) >=19  && std::abs(iEta)<=26  ) hCheckEnergyTiming_endcap->Fill(RecHitEnergy,RecHitTime);
 
+    if(Method0Energy<5) {
+      if(std::abs(iEta) < 14 )  hCheckChi2MX_barrel_lt5->Fill(log10(RecHitChi2));
+      if(std::abs(iEta) >=17  && std::abs(iEta)<=28 )  hCheckChi2MX_endcap_lt5->Fill(log10(RecHitChi2));
+    }
+
     if(Method0Energy>5) {
 
       if(std::abs(iEta) < 14 )  hCheckChi2MX_barrel_gt5->Fill(log10(RecHitChi2));
@@ -818,18 +940,22 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     // CORRELATION WITH M3
     //$$$$$$$$$$$$$$$
 
-    // Loop over all rechits in one event
-    for(int m = 0; m < (int)hRecHitsM3->size(); m++) {
+    if(std::abs(iEta) >=19  && std::abs(iEta)<=26 ) {
+      hCheckEnergyM2M3_endcap->Fill(RecHitEnergy,RecHitEnergyM3);
+      hCheckEnergyM2M3_endcap_zoom->Fill(RecHitEnergy,RecHitEnergyM3);
+      hCheckEnergyM2M3ratio_endcap_vsM2E->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
+      hCheckEnergyM2M3ratio_endcap_vsM2E_zoom->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
+      hCheckEnergyM2M3ratio_endcap->Fill(RecHitEnergyM3/RecHitEnergy);
+    }
+    if(std::abs(iEta) < 14) {
+      hCheckEnergyM2M3_barrel->Fill(RecHitEnergy,RecHitEnergyM3);
+      hCheckEnergyM2M3_barrel_zoom->Fill(RecHitEnergy,RecHitEnergyM3);
+      hCheckEnergyM2M3ratio_barrel_vsM2E->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
+      hCheckEnergyM2M3ratio_barrel_vsM2E_zoom->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
+      hCheckEnergyM2M3ratio_barrel->Fill(RecHitEnergyM3/RecHitEnergy);
+    }
 
-      HcalDetId detID_rh_M3 = (*hRecHitsM3)[m].id().rawId();
-      if(detID_rh_M3==detID_rh) {
-	if(std::abs(iEta) >=19  && std::abs(iEta)<=26 ) hCheckEnergyM2M3_endcap->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy());
-	if(std::abs(iEta) >=19  && std::abs(iEta)<=26 ) hCheckEnergyM2M3_endcap_zoom->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy());
-	if(std::abs(iEta) < 14)  hCheckEnergyM2M3_barrel->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy());
-      }
-
-    } // end M3
-
+    if(!isData) {
     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     /// CORRELATION WITH SIMHITS
     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -865,6 +991,7 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(SHitEn>0 && (*hRecHits)[i].energy()>0 && std::abs(detID_rh.ieta())>17 && depth==1) hCheckM2Pull_HE_depth1->Fill(((*hRecHits)[i].energy()-SHitEn)/SHitEn);
     if(SHitEn>0 && (*hRecHits)[i].energy()>0 && std::abs(detID_rh.ieta())>17 && depth==1) hCheckM2Pull_HE_depth1->Fill(((*hRecHits)[i].energy()-SHitEn)/SHitEn);
 
+
     //$$$$$$$$$$$$$$$
     /// Plotting individual pulses
     //$$$$$$$$$$$$$$$
@@ -889,11 +1016,12 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       hTimeSlices->GetYaxis()->SetTitle("fC");
 
       gStyle->SetOptStat(000000);
+    }// end simHits
 
       ///////////
       ///////////
-
       double ped=0;
+      if(!isData) {
       // Loop over all rechits in one event
       for(int k = 0; k < (int) channelData->size(); k++) {
 
@@ -906,6 +1034,7 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	  hTimeSlices->SetBinContent(ip+1,charge);
 	  cout << "ip=" << ip << "charge=" << charge << endl;
 	}
+      }
       }
 
       hTimeSlices->SetLineWidth(3);

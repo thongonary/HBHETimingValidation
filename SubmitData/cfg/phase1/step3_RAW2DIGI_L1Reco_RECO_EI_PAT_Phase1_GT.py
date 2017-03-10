@@ -26,12 +26,12 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(50)
+    input = cms.untracked.int32(30)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('file:step2.root'),
+                            fileNames = cms.untracked.vstring('file:step2_pi500_2017_realistic.root'),
                             secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -71,6 +71,10 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '
 
 # Save HBHEChannelInfo
 process.hbheprereco.saveInfos = cms.bool(True)
+
+process.hbheprerecoM2 = process.hbheprereco.clone()
+process.hbheprerecoM2.algorithm.__setattr__('useM2',cms.bool(True))
+process.hbheprerecoM2.algorithm.__setattr__('useM3',cms.bool(False))
 
 process.hbheprerecoM3 = process.hbheprereco.clone()
 process.hbheprerecoM3.algorithm.__setattr__('useM2',cms.bool(False))

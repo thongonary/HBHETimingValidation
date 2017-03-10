@@ -20,17 +20,14 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+        input = cms.untracked.int32(10)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
-#'file:root://cmsxrootd.fnal.gov//store/data/Run2016B/JetHT/RAW/v1/000/272/760/00000/7A42AE55-D513-E611-9D36-02163E011976.root'),
-    #'root://cmsxrootd.fnal.gov//store/data/Run2016B/HLTPhysics3/RAW/v1/000/272/022/00000/6E3580B0-C70D-E611-9629-02163E014468.root'),
-'file:root://eoscms.cern.ch//store/data/Run2016B/JetHT/RAW/v2/000/274/197/00000/8EB2A908-4A26-E611-A426-02163E013845.root'), 
-#'file:root://eoscms.cern.ch//store/data/Run2016B/SinglePhoton/RAW/v2/000/273/291/00000/244068EA-9D18-E611-B601-02163E0133FF.root'),
+        'root://eoscms.cern.ch:///store/data/Run2015E/HighPtPhoton30AndZ/RAW/v1/000/262/328/00000/861C5F7B-2693-E511-A46E-02163E0133F7.root'),
     skipEvents= cms.untracked.uint32(0),
     #eventsToProcess = cms.untracked.VEventRange('208353:332796231'),
     #lumisToProcess = cms.untracked.VLuminosityBlockRange('208353:278')
@@ -51,17 +48,17 @@ process.Timing = cms.Service("Timing")
 process.Timing.summaryOnly = cms.untracked.bool(False)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(16)
+process.options.numberOfThreads=cms.untracked.uint32(8)
 process.options.numberOfStreams=cms.untracked.uint32(0)
 
 #process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-# HBHE Noise Filter
-
+## HBHE Noise Filter
+#
 #process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
 #inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Loose'),
 #    reverseDecision = cms.bool(False)
 #)
-
+#
 #process.HBHENoiseFilterResultProducer = cms.EDProducer(
 #   'HBHENoiseFilterResultProducer',
 #    noiselabel = cms.InputTag('hcalnoise'),
@@ -75,7 +72,7 @@ process.options.numberOfStreams=cms.untracked.uint32(0)
 #    minIsolatedNoiseSumE = cms.double(50.0),
 #    minIsolatedNoiseSumEt = cms.double(25.0)
 #)
-
+#
 #process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
 #    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
 #    reverseDecision = cms.bool(False)
@@ -96,7 +93,7 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0),
     eventAutoFlushCompressedSize = cms.untracked.int32(1048576),
     outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
-    fileName = cms.untracked.string('file:DataRereco_jetHT_2016.root'),
+    fileName = cms.untracked.string('file:_tmpDataRereco_HighPtPhoton_2016.root'),
     dataset = cms.untracked.PSet(
         filterName = cms.untracked.string(''),
         dataTier = cms.untracked.string('GEN-SIM-RECO')
@@ -116,28 +113,40 @@ process.FEVTDEBUGHLToutput.outputCommands.append( "keep HcalNoiseSummary*_*_*_*"
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 
+# Save HBHEChannelInfo
+process.hbheprereco.saveInfos = cms.bool(True)
 
-process.hbhereco = process.hbheprereco.clone()
-process.hbherecoM3 = process.hbheprereco.clone()
-process.hbherecoM0 = process.hbheprereco.clone()
+process.hbheprerecoM2 = process.hbheprereco.clone()
+process.hbheprerecoM3 = process.hbheprereco.clone()
+process.hbheprerecoM3csv = process.hbheprereco.clone()
+process.hbheprerecoM0 = process.hbheprereco.clone()
+
+# Method 2 collection
+process.hbheprerecoM2.puCorrMethod = cms.int32(2)
+process.hbheprerecoM2.pulseShapeType = cms.int32(1)
 
 # Method 3 collection
-process.hbherecoM3.puCorrMethod = cms.int32(3)
+process.hbheprerecoM3.puCorrMethod = cms.int32(3)
+process.hbheprerecoM3.pulseShapeType = cms.int32(1)
+
+# Method 3 csv landau collection
+process.hbheprerecoM3csv.puCorrMethod = cms.int32(3)
+process.hbheprerecoM3csv.pulseShapeType = cms.int32(2)
 
 # Method 0 collection
-process.hbherecoM0.puCorrMethod = cms.int32(0)
+process.hbheprerecoM0.puCorrMethod = cms.int32(0)
 
 # Set Method 2 to use a single pulse fit
-#process.hbhereco.puCorrMethod = cms.int32(2)
-#process.hbhereco.ts4chi2 = cms.double(99999.)
-#process.hbhereco.timeMin = cms.double(-100.)
-#process.hbhereco.timeMax = cms.double(100.)
-#process.hbhereco.applyTimeConstraint = cms.bool(False)
+#process.hbheprereco.puCorrMethod = cms.int32(2)
+#process.hbheprereco.ts4chi2 = cms.double(99999.)
+#process.hbheprereco.timeMin = cms.double(-100.)
+#process.hbheprereco.timeMax = cms.double(100.)
+#process.hbheprereco.applyTimeConstraint = cms.bool(False)
 
 
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
-process.reconstruction_step = cms.Path(process.reconstruction * process.hbherecoM3 * process.hbherecoM0)
+process.reconstruction_step = cms.Path(process.reconstruction * process.hbheprerecoM2 * process.hbheprerecoM3 * process.hbheprerecoM3csv * process.hbheprerecoM0)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
