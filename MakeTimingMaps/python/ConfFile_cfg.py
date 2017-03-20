@@ -5,20 +5,34 @@ process = cms.Process("Demo")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.options = cms.untracked.PSet (wantSummary = cms.untracked.bool(False))
 
+process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 
-        'file:$CMSSW_BASE/src/HBHETimingValidation/SubmitData/cfg/step3_singlepi_M3_Pars3.root'
+#        'file:$CMSSW_BASE/src/HBHETimingValidation/SubmitData/cfg/phase1/step3_pi1-100_2017_realistic_1Pulse_MCFit.root'
+#        'file:$CMSSW_BASE/src/HBHETimingValidation/SubmitData/cfg/phase1/step3_pi1-100_2017_realistic_1Pulse_defaultFit.root'
+#        'file:$CMSSW_BASE/src/HBHETimingValidation/SubmitData/cfg/phase1/step3_pi1-100_2017_realistic_3Pulse.root'
+#        'file:$CMSSW_BASE/src/HBHETimingValidation/SubmitData/cfg/phase1/step3_pi1-100_2017_realistic_3Pulse_defaultFit.root'
+#        'file:$CMSSW_BASE/src/HBHETimingValidation/SubmitData/cfg/phase1/step3_pi1-100_2017_realistic_switchPulse.root'
+        'file:$CMSSW_BASE/src/HBHETimingValidation/SubmitData/cfg/phase1/step3_pi1-100_2017_realistic_switchPulse_defaultFit.root'
 
     )
 )
 
-process.timingMaps = cms.EDAnalyzer('MakeRun2M3Plots')
+process.timingMaps = cms.EDAnalyzer('MakeRun2M3M2Plots')
 
-process.TFileService = cms.Service('TFileService', fileName = cms.string('step3_singlepi_M3_Pars3.root') )
-
+#process.TFileService = cms.Service('TFileService', fileName = cms.string('step3_pi1-100_2017_realistic_1Pulse_MCFit.root') )
+#process.TFileService = cms.Service('TFileService', fileName = cms.string('step3_pi1-100_2017_realistic_1Pulse_defaultFit.root') )
+#process.TFileService = cms.Service('TFileService', fileName = cms.string('step3_pi1-100_2017_realistic_3Pulse.root') )
+#process.TFileService = cms.Service('TFileService', fileName = cms.string('step3_pi1-100_2017_realistic_3Pulse_defaultFit.root') )
+#process.TFileService = cms.Service('TFileService', fileName = cms.string('step3_pi1-100_2017_realistic_switchPulse.root') )
+process.TFileService = cms.Service('TFileService', fileName = cms.string('step3_pi1-100_2017_realistic_switchPulse_defaultFit.root') )
 
 process.p = cms.Path(process.timingMaps)
