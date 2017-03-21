@@ -33,6 +33,7 @@ using namespace std;
 #include "TCanvas.h"
 #include "TProfile2D.h"
 #include "TLatex.h"
+#include "TGraph.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -150,6 +151,24 @@ class MakeRun2M3M2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>
         TProfile *hCheckM3SimHit_SimHit;
         TProfile *hCheckM3SimHit_iEta;
         
+        TProfile *hCheckM2SimHit_SimHit_HB;
+        TProfile *hCheckM2SimHit_SimHit_HE;
+        
+        TProfile *hCheckM3SimHit_SimHit_HB;
+        TProfile *hCheckM3SimHit_SimHit_HE;
+        
+        TH1D *hCheckM2SimHit_SimHit_Err;
+        TH1D *hCheckM2SimHit_iEta_Err;
+        
+        TH1D *hCheckM3SimHit_SimHit_Err;
+        TH1D *hCheckM3SimHit_iEta_Err;
+        
+        TH1D *hCheckM2SimHit_SimHit_HB_Err;
+        TH1D *hCheckM2SimHit_SimHit_HE_Err;
+        
+        TH1D *hCheckM3SimHit_SimHit_HB_Err;
+        TH1D *hCheckM3SimHit_SimHit_HE_Err;
+        
         TH2F *hCheckM2SimHit_iEta_TH2;
         TH2F *hCheckM3SimHit_iEta_TH2;
 
@@ -188,14 +207,36 @@ MakeRun2M3M2Plots::MakeRun2M3M2Plots(const edm::ParameterSet& iConfig)
 
     double binSimHit[] = {0,10,20,30,45,60,80,100,120,150,200,300,500};
     int binnum = sizeof(binSimHit)/sizeof(double) - 1;
+    
     hCheckM2SimHit_SimHit = FileService->make<TProfile>("CheckM2SimHit_SimHit",";SimHit;M2/SimHit",binnum,binSimHit,0.5,1.5,"s");
     hCheckM3SimHit_SimHit = FileService->make<TProfile>("CheckM3SimHit_SimHit",";SimHit;M3/SimHit",binnum,binSimHit,0.5,1.5,"s");
 
     hCheckM2SimHit_iEta = FileService->make<TProfile>("CheckM2SimHit_iEta",";iEta;M2/SimHit",59,-29.5,29.5,"s");
     hCheckM3SimHit_iEta = FileService->make<TProfile>("CheckM3SimHit_iEta",";iEta;M3/SimHit",59,-29.5,29.5,"s");
     
+    hCheckM2SimHit_SimHit_HB = FileService->make<TProfile>("CheckM2SimHit_SimHit_HB",";SimHit;M2/SimHit",binnum,binSimHit,0.5,1.5,"s");
+    hCheckM3SimHit_SimHit_HB = FileService->make<TProfile>("CheckM3SimHit_SimHit_HB",";SimHit;M3/SimHit",binnum,binSimHit,0.5,1.5,"s");
+    
+    hCheckM2SimHit_SimHit_HE = FileService->make<TProfile>("CheckM2SimHit_SimHit_HB",";SimHit;M2/SimHit",binnum,binSimHit,0.5,1.5,"s");
+    hCheckM3SimHit_SimHit_HE = FileService->make<TProfile>("CheckM3SimHit_SimHit_HB",";SimHit;M3/SimHit",binnum,binSimHit,0.5,1.5,"s");
+    
+    // TH2F for sanity check 
     hCheckM2SimHit_iEta_TH2 = FileService->make<TH2F>("CheckM2SimHit_iEta_TH2",";iEta;M2/SimHit",59,-29.5,29.5,100,0,2);
     hCheckM3SimHit_iEta_TH2 = FileService->make<TH2F>("CheckM3SimHit_iEta_TH2",";iEta;M3/SimHit",59,-29.5,29.5,100,0,2);
+    
+    // Error histograms
+    
+    hCheckM2SimHit_SimHit_Err = FileService->make<TH1D>("CheckM2SimHit_SimHit_Err",";SimHit;M2/SimHit",binnum,binSimHit);
+    hCheckM3SimHit_SimHit_Err = FileService->make<TH1D>("CheckM3SimHit_SimHit_Err",";SimHit;M3/SimHit",binnum,binSimHit);
+
+    hCheckM2SimHit_iEta_Err = FileService->make<TH1D>("CheckM2SimHit_iEta_Err",";iEta;M2/SimHit",59,-29.5,29.5);
+    hCheckM3SimHit_iEta_Err = FileService->make<TH1D>("CheckM3SimHit_iEta_Err",";iEta;M3/SimHit",59,-29.5,29.5);
+    
+    hCheckM2SimHit_SimHit_HB_Err = FileService->make<TH1D>("CheckM2SimHit_SimHit_HB_Err",";SimHit;M2/SimHit",binnum,binSimHit);
+    hCheckM3SimHit_SimHit_HB_Err = FileService->make<TH1D>("CheckM3SimHit_SimHit_HB_Err",";SimHit;M3/SimHit",binnum,binSimHit);
+    
+    hCheckM2SimHit_SimHit_HE_Err = FileService->make<TH1D>("CheckM2SimHit_SimHit_HB_Err",";SimHit;M2/SimHit",binnum,binSimHit);
+    hCheckM3SimHit_SimHit_HE_Err = FileService->make<TH1D>("CheckM3SimHit_SimHit_HB_Err",";SimHit;M3/SimHit",binnum,binSimHit);
 }
 
 
@@ -309,6 +350,8 @@ void MakeRun2M3M2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup&
         }
         if (SHitEn>0 && (*hRecHits)[i].energy()>0 && HPD) hCheckM2SimHit->Fill(SHitEn, RecHitEnergyM2/SHitEn); 
         if (SHitEn>0 && (*hRecHits)[i].energy()>0 && HPD) hCheckM2SimHit_SimHit->Fill(SHitEn, RecHitEnergyM2/SHitEn); 
+        if (SHitEn>0 && (*hRecHits)[i].energy()>0 && HPD && std::abs(detID_rh.ieta())<15) hCheckM2SimHit_SimHit_HB->Fill(SHitEn, RecHitEnergyM2/SHitEn); 
+        if (SHitEn>0 && (*hRecHits)[i].energy()>0 && HPD && std::abs(detID_rh.ieta())>17) hCheckM2SimHit_SimHit_HE->Fill(SHitEn, RecHitEnergyM2/SHitEn); 
         if (SHitEn>0 && (*hRecHits)[i].energy()>5 && HPD) hCheckM2SimHit_iEta->Fill(detID_rh.ieta(), RecHitEnergyM2/SHitEn); 
         if (SHitEn>0 && (*hRecHits)[i].energy()>5 && HPD) hCheckM2SimHit_iEta_TH2->Fill(detID_rh.ieta(), RecHitEnergyM2/SHitEn); 
         if (SHitEn>0 && (*hRecHits)[i].energy()>5 && HPD) hCheckM2SimHit_1D->Fill(RecHitEnergyM2/SHitEn); 
@@ -341,6 +384,8 @@ void MakeRun2M3M2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup&
         }
         if (SHitEn>0 && (*hRecHitsM3)[i].energy()>0 && HPD) hCheckM3SimHit->Fill(SHitEn, RecHitEnergyM3/SHitEn); 
         if (SHitEn>0 && (*hRecHitsM3)[i].energy()>0 && HPD) hCheckM3SimHit_SimHit->Fill(SHitEn, RecHitEnergyM3/SHitEn); 
+        if (SHitEn>0 && (*hRecHitsM3)[i].energy()>0 && HPD && std::abs(detID_rh.ieta())<15) hCheckM3SimHit_SimHit_HB->Fill(SHitEn, RecHitEnergyM3/SHitEn); 
+        if (SHitEn>0 && (*hRecHitsM3)[i].energy()>0 && HPD && std::abs(detID_rh.ieta())>17) hCheckM3SimHit_SimHit_HE->Fill(SHitEn, RecHitEnergyM3/SHitEn); 
         if (SHitEn>0 && (*hRecHitsM3)[i].energy()>5 && HPD) hCheckM3SimHit_iEta->Fill(detID_rh.ieta(), RecHitEnergyM3/SHitEn); 
         if (SHitEn>0 && (*hRecHitsM3)[i].energy()>5 && HPD) hCheckM3SimHit_iEta_TH2->Fill(detID_rh.ieta(), RecHitEnergyM3/SHitEn); 
         if (SHitEn>0 && (*hRecHitsM3)[i].energy()>5 && HPD) hCheckM3SimHit_1D->Fill(RecHitEnergyM3/SHitEn); 
@@ -353,41 +398,21 @@ void MakeRun2M3M2Plots::beginJob(){}
 // ------------ method called once each job just after ending the event loop  ------------
 void MakeRun2M3M2Plots::endJob()
 {
-    //    TCanvas *c1 = new TCanvas("c1","",650,600);
-    //    c1->cd();
-    //    gStyle->SetOptStat(11);
-    //    gPad->SetLogz();
-    //    gPad->SetGridy();
-    //
-    //    hCheckM3M2_HPD->Draw("COLZ");
-    //    c1->SaveAs("M3M2_HB.png");
-    //    
-    //    hCheckM3M2_HPD_zoom->Draw("COLZ");
-    //    c1->SaveAs("M3M2_HB_zoom.png");
-    //    
-    //    hCheckM3csvM2_HB->Draw("COLZ");
-    //    c1->SaveAs("M3csvM2_HB.png");
-    //   
-    //    hCheckM3csvM2_HB_zoom->Draw("COLZ");
-    //    c1->SaveAs("M3csvM2_HB_zoom.png");
-    //   
-    //    hCheckM3csv105M2_HB->Draw("COLZ");
-    //    c1->SaveAs("M3csv105M2_HB.png");
-    //   
-    //    hCheckM3csv105M2_HB_zoom->Draw("COLZ");
-    //    c1->SaveAs("M3csv105M2_HB_zoom.png");
-    //    
-    //    gPad->SetGridy(0);
-    //    gPad->SetGridx();
-    //    
-    //    hCheckM3csvM2_HB_1D->Draw();
-    //    c1->SaveAs("M3csvM2_HB_1D.png");
-    //    
-    //    hCheckM3M2_HPD_1D->Draw();
-    //    c1->SaveAs("M3M2_HB_1D.png");
-    //    
-    //    hCheckM3csv105M2_HB_1D->Draw();
-    //    c1->SaveAs("M3csv105M2_HB_1D.png");
+    for (Int_t i = 1; i < hCheckM3SimHit_SimHit->GetNbinsX(); i++)
+    {
+        if (hCheckM2SimHit_SimHit->GetBinError(i)>0 && hCheckM2SimHit_SimHit->GetBinContent(i) != 0) hCheckM2SimHit_SimHit_Err->SetBinContent(i,double(hCheckM2SimHit_SimHit->GetBinError(i)/hCheckM2SimHit_SimHit->GetBinContent(i)));
+        if (hCheckM3SimHit_SimHit->GetBinError(i)>0 && hCheckM3SimHit_SimHit->GetBinContent(i) != 0) hCheckM3SimHit_SimHit_Err->SetBinContent(i,double(hCheckM3SimHit_SimHit->GetBinError(i)/hCheckM3SimHit_SimHit->GetBinContent(i)));
+        if (hCheckM2SimHit_SimHit_HB->GetBinError(i)>0 && hCheckM2SimHit_SimHit_HB->GetBinContent(i) != 0) hCheckM2SimHit_SimHit_HB_Err->SetBinContent(i,double(hCheckM2SimHit_SimHit_HB->GetBinError(i)/hCheckM2SimHit_SimHit_HB->GetBinContent(i)));
+        if (hCheckM3SimHit_SimHit_HB->GetBinError(i)>0 && hCheckM3SimHit_SimHit_HB->GetBinContent(i) != 0) hCheckM3SimHit_SimHit_HB_Err->SetBinContent(i,double(hCheckM3SimHit_SimHit_HB->GetBinError(i)/hCheckM3SimHit_SimHit_HB->GetBinContent(i)));
+        if (hCheckM2SimHit_SimHit_HE->GetBinError(i)>0 && hCheckM2SimHit_SimHit_HE->GetBinContent(i) != 0) hCheckM2SimHit_SimHit_HE_Err->SetBinContent(i,double(hCheckM2SimHit_SimHit_HE->GetBinError(i)/hCheckM2SimHit_SimHit_HE->GetBinContent(i)));
+        if (hCheckM3SimHit_SimHit_HE->GetBinError(i)>0 && hCheckM3SimHit_SimHit_HE->GetBinContent(i) != 0) hCheckM3SimHit_SimHit_HE_Err->SetBinContent(i,double(hCheckM3SimHit_SimHit_HE->GetBinError(i)/hCheckM3SimHit_SimHit_HE->GetBinContent(i)));
+    }
+    
+    for (Int_t i = 1; i < hCheckM3SimHit_iEta->GetNbinsX(); i++)
+    {
+        if (hCheckM2SimHit_iEta->GetBinError(i)>0 && hCheckM2SimHit_iEta->GetBinContent(i) != 0) hCheckM2SimHit_iEta_Err->SetBinContent(i,double(hCheckM2SimHit_iEta->GetBinError(i)/hCheckM2SimHit_iEta->GetBinContent(i)));
+        if (hCheckM3SimHit_iEta->GetBinError(i)>0 && hCheckM3SimHit_iEta->GetBinContent(i) != 0) hCheckM3SimHit_iEta_Err->SetBinContent(i,double(hCheckM3SimHit_iEta->GetBinError(i)/hCheckM3SimHit_iEta->GetBinContent(i)));
+    }
 }
 
 void MakeRun2M3M2Plots::ClearVariables(){
