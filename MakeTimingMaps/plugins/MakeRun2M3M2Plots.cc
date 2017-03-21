@@ -217,8 +217,8 @@ MakeRun2M3M2Plots::MakeRun2M3M2Plots(const edm::ParameterSet& iConfig)
     hCheckM2SimHit_SimHit_HB = FileService->make<TProfile>("CheckM2SimHit_SimHit_HB",";SimHit;M2/SimHit",binnum,binSimHit,0.5,1.5,"s");
     hCheckM3SimHit_SimHit_HB = FileService->make<TProfile>("CheckM3SimHit_SimHit_HB",";SimHit;M3/SimHit",binnum,binSimHit,0.5,1.5,"s");
     
-    hCheckM2SimHit_SimHit_HE = FileService->make<TProfile>("CheckM2SimHit_SimHit_HB",";SimHit;M2/SimHit",binnum,binSimHit,0.5,1.5,"s");
-    hCheckM3SimHit_SimHit_HE = FileService->make<TProfile>("CheckM3SimHit_SimHit_HB",";SimHit;M3/SimHit",binnum,binSimHit,0.5,1.5,"s");
+    hCheckM2SimHit_SimHit_HE = FileService->make<TProfile>("CheckM2SimHit_SimHit_HE",";SimHit;M2/SimHit",binnum,binSimHit,0.5,1.5,"s");
+    hCheckM3SimHit_SimHit_HE = FileService->make<TProfile>("CheckM3SimHit_SimHit_HE",";SimHit;M3/SimHit",binnum,binSimHit,0.5,1.5,"s");
     
     // TH2F for sanity check 
     hCheckM2SimHit_iEta_TH2 = FileService->make<TH2F>("CheckM2SimHit_iEta_TH2",";iEta;M2/SimHit",59,-29.5,29.5,100,0,2);
@@ -235,8 +235,8 @@ MakeRun2M3M2Plots::MakeRun2M3M2Plots(const edm::ParameterSet& iConfig)
     hCheckM2SimHit_SimHit_HB_Err = FileService->make<TH1D>("CheckM2SimHit_SimHit_HB_Err",";SimHit;M2/SimHit",binnum,binSimHit);
     hCheckM3SimHit_SimHit_HB_Err = FileService->make<TH1D>("CheckM3SimHit_SimHit_HB_Err",";SimHit;M3/SimHit",binnum,binSimHit);
     
-    hCheckM2SimHit_SimHit_HE_Err = FileService->make<TH1D>("CheckM2SimHit_SimHit_HB_Err",";SimHit;M2/SimHit",binnum,binSimHit);
-    hCheckM3SimHit_SimHit_HE_Err = FileService->make<TH1D>("CheckM3SimHit_SimHit_HB_Err",";SimHit;M3/SimHit",binnum,binSimHit);
+    hCheckM2SimHit_SimHit_HE_Err = FileService->make<TH1D>("CheckM2SimHit_SimHit_HE_Err",";SimHit;M2/SimHit",binnum,binSimHit);
+    hCheckM3SimHit_SimHit_HE_Err = FileService->make<TH1D>("CheckM3SimHit_SimHit_HE_Err",";SimHit;M3/SimHit",binnum,binSimHit);
 }
 
 
